@@ -97,7 +97,7 @@ func encodeValue(v reflect.Value) (string, error) {
 	case reflect.Interface, reflect.Ptr:
 		return encodeValue(v.Elem())
 	default:
-		return "", fmt.Errorf("unsupported field kind: %d", v.Kind())
+		return "", fmt.Errorf("unsupported field kind: %s", v.Kind().String())
 	}
 }
 
