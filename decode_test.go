@@ -29,7 +29,19 @@ func TestDecode(t *testing.T) {
 			}(), false,
 		},
 
-		{"FailUnsettable", args{map[string][]string{}, struct{}{}}, struct{}{}, true},
+		{"FailAddressable", args{map[string][]string{}, struct{}{}}, struct{}{}, true},
+
+		{
+			"InitializeNil", args{map[string][]string{},
+				func() *struct{} {
+					var s struct{}
+					return &s
+				}()},
+			func() *struct{} {
+				s := struct{}{}
+				return &s
+			}(), false,
+		},
 
 		{
 			"BasicStruct", args{map[string][]string{"Value": {"foobar"}},

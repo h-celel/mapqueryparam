@@ -12,22 +12,24 @@ func Decode(query map[string][]string, v interface{}) error {
 	val := reflect.ValueOf(v)
 	t := reflect.TypeOf(v)
 
-	elemVal := val
-	for elemVal.Kind() == reflect.Ptr {
-		elemVal = elemVal.Elem()
+	if val.Kind() != reflect.Ptr {
+		return errors.New("must decode to pointer")
 	}
 
-	elemT := t
-	for elemT.Kind() == reflect.Ptr {
-		elemT = elemT.Elem()
+	for t.Kind() == reflect.Ptr {
+		t = t.Elem()
+
+		if val.IsNil() {
+			val.Set(reflect.New(t))
+		}
+
+		val = val.Elem()
 	}
 
-	if !elemVal.CanAddr() {
-		return errors.New("unable to address return value")
-	}
+	newVal := reflect.New(t)
 
-	for i := 0; i < elemVal.NumField(); i++ {
-		fTyp := elemT.Field(i)
+	for i := 0; i < newVal.Elem().NumField(); i++ {
+		fTyp := t.Field(i)
 		isUnexported := fTyp.PkgPath != ""
 		if isUnexported {
 			continue
@@ -39,12 +41,14 @@ func Decode(query map[string][]string, v interface{}) error {
 			continue
 		}
 
-		fVal := elemVal.Field(i)
+		fVal := newVal.Elem().Field(i)
 		err := decodeField(s, fVal)
 		if err != nil {
 			return err
 		}
 	}
+
+	val.Set(newVal.Elem())
 
 	return nil
 }
@@ -83,6 +87,12 @@ func decodeValue(s string, v reflect.Value) error {
 	switch v.Elem().Kind() {
 	case reflect.String:
 		v.Elem().SetString(s)
+	case reflect.Bool:
+		b, err := strconv.ParseBool(s)
+		if err != nil {
+			return err
+		}
+		v.Elem().SetBool(b)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		i, err := strconv.ParseInt(s, 10, 64)
 		if err != nil {
@@ -107,7 +117,7 @@ func decodeValue(s string, v reflect.Value) error {
 			return err
 		}
 	default:
-		return fmt.Errorf("unsupported field kind: %s", v.Kind().String())
+		return fmt.Errorf("unsupported field kind: %s", v.Elem().Kind().String())
 	}
 	return nil
 }
