@@ -8,8 +8,9 @@ import (
 
 func main() {
 	type CoolStruct struct {
-		Name string
-		ID   int
+		Name     string
+		ID       int
+		ParentID *int
 	}
 
 	type CoolRoot struct {
