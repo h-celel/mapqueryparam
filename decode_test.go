@@ -4,6 +4,7 @@ import (
 	"mapqueryparam"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestDecode(t *testing.T) {
@@ -161,6 +162,18 @@ func TestDecode(t *testing.T) {
 				var i interface{ A() []string }
 				return &i
 			}(), true,
+		},
+
+		{
+			"Times", args{map[string][]string{"A": {time.Unix(1000, 1000).Format(time.RFC3339Nano)}, "B": {"1000"}},
+				func() *struct{ A, B time.Time } {
+					s := struct{ A, B time.Time }{}
+					return &s
+				}()},
+			func() *struct{ A, B time.Time } {
+				s := struct{ A, B time.Time }{time.Unix(1000, 1000), time.Unix(1000, 0)}
+				return &s
+			}(), false,
 		},
 	}
 	for _, tt := range tests {

@@ -4,6 +4,7 @@ import (
 	"mapqueryparam"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestEncode(t *testing.T) {
@@ -39,6 +40,7 @@ func TestEncode(t *testing.T) {
 		{"Bool", args{struct{ Value bool }{true}}, map[string][]string{"Value": {"true"}}, false},
 		{"Structs", args{struct{ Value struct{ Value2 string } }{struct{ Value2 string }{"foobar"}}}, map[string][]string{"Value": {"{\"Value2\":\"foobar\"}"}}, false},
 		{"Maps", args{struct{ Value map[string]string }{map[string]string{"Value2": "foobar"}}}, map[string][]string{"Value": {"{\"Value2\":\"foobar\"}"}}, false},
+		{"Times", args{struct{ Value time.Time }{time.Unix(1000, 1000)}}, map[string][]string{"Value": {time.Unix(1000, 1000).Format(time.RFC3339Nano)}}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

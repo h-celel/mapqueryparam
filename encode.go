@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"reflect"
 	"strconv"
+	"time"
 )
 
 func EncodeValues(v interface{}) (url.Values, error) {
@@ -97,8 +98,15 @@ func encodeValue(v reflect.Value) (string, error) {
 	case reflect.Float64:
 		return strconv.FormatFloat(v.Float(), 'f', -1, 64), nil
 	case reflect.Map, reflect.Struct:
-		b, err := json.Marshal(v.Interface())
-		return string(b), err
+		i := v.Interface()
+		switch t := i.(type) {
+		case time.Time:
+			return t.Format(time.RFC3339Nano), nil
+		default:
+			b, err := json.Marshal(i)
+			return string(b), err
+		}
+
 	case reflect.Interface, reflect.Ptr:
 		return encodeValue(v.Elem())
 	default:
@@ -120,6 +128,12 @@ func isEmptyValue(v reflect.Value) bool {
 		return v.Float() == 0
 	case reflect.Interface, reflect.Ptr:
 		return v.IsNil()
+	case reflect.Struct:
+		i := v.Interface()
+		switch t := i.(type) {
+		case time.Time:
+			return t.IsZero()
+		}
 	}
 	return false
 }

@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"net/url"
 	"reflect"
 	"strconv"
+	"time"
 )
 
 func DecodeValues(query url.Values, v interface{}) error {
@@ -121,12 +123,37 @@ func decodeValue(s string, v reflect.Value) error {
 		}
 		v.Elem().SetFloat(f)
 	case reflect.Map, reflect.Struct:
-		err := json.Unmarshal([]byte(s), v.Interface())
-		if err != nil {
-			return err
+		i := v.Interface()
+		switch i.(type) {
+		case *time.Time:
+			t, err := parseTime(s)
+			if err != nil {
+				return err
+			}
+			v.Elem().Set(reflect.ValueOf(t))
+		default:
+			err := json.Unmarshal([]byte(s), i)
+			if err != nil {
+				return err
+			}
 		}
 	default:
 		return fmt.Errorf("unsupported field kind: %s", v.Elem().Kind().String())
 	}
 	return nil
+}
+
+func parseTime(s string) (time.Time, error) {
+	t, err := time.Parse(time.RFC3339Nano, s)
+	if err == nil {
+		return t, nil
+	}
+
+	f, err2 := strconv.ParseFloat(s, 64)
+	if err2 != nil {
+		return time.Time{}, err
+	}
+
+	sec, dec := math.Modf(f)
+	return time.Unix(int64(sec), int64(dec*(1e9))), nil
 }
