@@ -144,16 +144,22 @@ func decodeValue(s string, v reflect.Value) error {
 }
 
 func parseTime(s string) (time.Time, error) {
+	// attempt to parse time as RFC3339 string
 	t, err := time.Parse(time.RFC3339Nano, s)
 	if err == nil {
 		return t, nil
 	}
 
-	f, err2 := strconv.ParseFloat(s, 64)
-	if err2 != nil {
-		return time.Time{}, err
+	// attempt to parse time as float number of unix seconds
+	if f, err := strconv.ParseFloat(s, 64); err == nil {
+		sec, dec := math.Modf(f)
+		return time.Unix(int64(sec), int64(dec*(1e9))), nil
 	}
 
-	sec, dec := math.Modf(f)
-	return time.Unix(int64(sec), int64(dec*(1e9))), nil
+	// attempt to parse time as json marshaled value
+	if err := json.Unmarshal([]byte(s), &t); err == nil {
+		return t, nil
+	}
+
+	return time.Time{}, err
 }
