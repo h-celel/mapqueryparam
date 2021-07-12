@@ -26,6 +26,10 @@ func Decode(query map[string][]string, v interface{}) error {
 		val = val.Elem()
 	}
 
+	if t.Kind() != reflect.Struct {
+		return fmt.Errorf("cannot decode into value of type: %s", t.String())
+	}
+
 	newVal := reflect.New(t)
 
 	for i := 0; i < newVal.Elem().NumField(); i++ {

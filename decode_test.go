@@ -150,6 +150,18 @@ func TestDecode(t *testing.T) {
 				return &s
 			}(), false,
 		},
+
+		{
+			"Interface", args{map[string][]string{"B": {"foo", "bar"}},
+				func() *interface{ A() []string } {
+					var i interface{ A() []string }
+					return &i
+				}()},
+			func() *interface{ A() []string } {
+				var i interface{ A() []string }
+				return &i
+			}(), true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
