@@ -4,9 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"reflect"
 	"strconv"
 )
+
+func EncodeValues(v interface{}) (url.Values, error) {
+	return Encode(v)
+}
 
 func Encode(v interface{}) (map[string][]string, error) {
 	if v == nil {

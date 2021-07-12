@@ -4,9 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"reflect"
 	"strconv"
 )
+
+func DecodeValues(query url.Values, v interface{}) error {
+	return Decode(query, v)
+}
 
 func Decode(query map[string][]string, v interface{}) error {
 	val := reflect.ValueOf(v)
