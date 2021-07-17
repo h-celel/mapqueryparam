@@ -136,6 +136,8 @@ func encodeValue(v reflect.Value) (string, error) {
 
 	case reflect.Interface, reflect.Ptr:
 		return encodeValue(v.Elem())
+	case reflect.Chan, reflect.Func:
+		return "", nil
 	default:
 		return "", fmt.Errorf("unsupported field kind: %s", v.Kind().String())
 	}
@@ -157,6 +159,8 @@ func isEmptyValue(v reflect.Value) bool {
 		return v.Complex() == 0
 	case reflect.Interface, reflect.Ptr:
 		return v.IsNil()
+	case reflect.Chan, reflect.Func:
+		return true
 	case reflect.Struct:
 		i := v.Interface()
 		switch t := i.(type) {

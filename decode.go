@@ -145,6 +145,7 @@ func decodeValue(s string, v reflect.Value) error {
 				return err
 			}
 		}
+	case reflect.Chan, reflect.Func:
 	default:
 		return fmt.Errorf("unsupported field kind: %s", v.Elem().Kind().String())
 	}

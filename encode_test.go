@@ -48,6 +48,8 @@ func TestEncode(t *testing.T) {
 		{"MQPTag", args{struct {
 			A string `json:"b" mqp:"c"`
 		}{"foobar"}}, map[string][]string{"c": {"foobar"}}, false},
+		{"SkipChannels", args{struct{ Value chan string }{Value: make(chan string)}}, map[string][]string{}, false},
+		{"SkipFunctions", args{struct{ Value func() }{Value: func() {}}}, map[string][]string{}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

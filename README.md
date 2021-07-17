@@ -9,6 +9,10 @@ This encoding omits empty/zero/nil values in all cases, as there is no
 convention for representing the difference between them in the standard 
 query parameter format.
 
+Channels and function types cannot be encoded. 
+
+Cyclic data structures will cause the encoder to get stuck in an infinite loop.
+
 ## Installation
 
 ```

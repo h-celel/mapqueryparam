@@ -227,6 +227,30 @@ func TestDecode(t *testing.T) {
 				return &s
 			}(), false,
 		},
+
+		{
+			"SkipChannels", args{map[string][]string{"Value": {"foobar"}},
+				func() *struct{ Value chan string } {
+					s := struct{ Value chan string }{}
+					return &s
+				}()},
+			func() *struct{ Value chan string } {
+				s := struct{ Value chan string }{}
+				return &s
+			}(), false,
+		},
+
+		{
+			"SkipFunctions", args{map[string][]string{"Value": {"foobar"}},
+				func() *struct{ Value func() } {
+					s := struct{ Value func() }{}
+					return &s
+				}()},
+			func() *struct{ Value func() } {
+				s := struct{ Value func() }{}
+				return &s
+			}(), false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
