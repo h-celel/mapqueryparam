@@ -104,6 +104,18 @@ func TestDecode(t *testing.T) {
 		},
 
 		{
+			"ComplexNums", args{map[string][]string{"A": {"(2+2i)"}, "B": {"(3+3i)"}},
+				func() *struct{ A, B complex128 } {
+					s := struct{ A, B complex128 }{}
+					return &s
+				}()},
+			func() *struct{ A, B complex128 } {
+				s := struct{ A, B complex128 }{2 + 2i, 3 + 3i}
+				return &s
+			}(), false,
+		},
+
+		{
 			"Maps", args{map[string][]string{"A": {"{\"foo\":\"bar\"}"}},
 				func() *struct{ A map[string]string } {
 					s := struct{ A map[string]string }{}
@@ -177,6 +189,70 @@ func TestDecode(t *testing.T) {
 				}(), false,
 			},
 		*/
+
+		{
+			"JsonTag", args{map[string][]string{"b": {"foobar"}},
+				func() *struct {
+					A string `json:"b,omitempty"`
+				} {
+					s := struct {
+						A string `json:"b,omitempty"`
+					}{}
+					return &s
+				}()},
+			func() *struct {
+				A string `json:"b,omitempty"`
+			} {
+				s := struct {
+					A string `json:"b,omitempty"`
+				}{"foobar"}
+				return &s
+			}(), false,
+		},
+
+		{
+			"MQPTag", args{map[string][]string{"b": {"foobar"}},
+				func() *struct {
+					A string `mqp:"b"`
+				} {
+					s := struct {
+						A string `mqp:"b"`
+					}{}
+					return &s
+				}()},
+			func() *struct {
+				A string `mqp:"b"`
+			} {
+				s := struct {
+					A string `mqp:"b"`
+				}{"foobar"}
+				return &s
+			}(), false,
+		},
+
+		{
+			"SkipChannels", args{map[string][]string{"Value": {"foobar"}},
+				func() *struct{ Value chan string } {
+					s := struct{ Value chan string }{}
+					return &s
+				}()},
+			func() *struct{ Value chan string } {
+				s := struct{ Value chan string }{}
+				return &s
+			}(), false,
+		},
+
+		{
+			"SkipFunctions", args{map[string][]string{"Value": {"foobar"}},
+				func() *struct{ Value func() } {
+					s := struct{ Value func() }{}
+					return &s
+				}()},
+			func() *struct{ Value func() } {
+				s := struct{ Value func() }{}
+				return &s
+			}(), false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
