@@ -46,8 +46,6 @@ url := fmt.Sprintf("some.site?%s", parameters.Encode())
 ```go
 var o StructOfChoice
 
-req.Query()
-
 err := mapqueryparam.DecodeValues(req.Query(), &o)
 if err != nil {
     panic(err)
