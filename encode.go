@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -54,10 +55,32 @@ func Encode(v interface{}) (map[string][]string, error) {
 			continue
 		}
 
-		res[fTyp.Name] = d
+		fieldTag := getFieldTag(fTyp)
+
+		res[fieldTag] = d
 	}
 
 	return res, nil
+}
+
+func getFieldTag(t reflect.StructField) string {
+	if tags := t.Tag.Get(mapQueryParameterTagName); len(tags) > 0 {
+		for _, s := range strings.Split(tags, ",") {
+			if len(s) > 0 {
+				return s
+			}
+		}
+	}
+
+	if tags := t.Tag.Get("json"); len(tags) > 0 {
+		for _, s := range strings.Split(tags, ",") {
+			if len(s) > 0 && !strings.EqualFold(s, "omitempty") {
+				return s
+			}
+		}
+	}
+
+	return t.Name
 }
 
 func encodeField(v reflect.Value) ([]string, error) {

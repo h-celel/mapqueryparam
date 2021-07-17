@@ -48,7 +48,9 @@ func Decode(query map[string][]string, v interface{}) error {
 
 		var s []string
 		var ok bool
-		if s, ok = query[fTyp.Name]; !ok {
+
+		fieldTag := getFieldTag(fTyp)
+		if s, ok = query[fieldTag]; !ok {
 			continue
 		}
 

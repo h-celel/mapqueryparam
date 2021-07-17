@@ -175,6 +175,46 @@ func TestDecode(t *testing.T) {
 				return &s
 			}(), false,
 		},
+
+		{
+			"JsonTag", args{map[string][]string{"b": {"foobar"}},
+				func() *struct {
+					A string `json:"b,omitempty"`
+				} {
+					s := struct {
+						A string `json:"b,omitempty"`
+					}{}
+					return &s
+				}()},
+			func() *struct {
+				A string `json:"b,omitempty"`
+			} {
+				s := struct {
+					A string `json:"b,omitempty"`
+				}{"foobar"}
+				return &s
+			}(), false,
+		},
+
+		{
+			"MQPTag", args{map[string][]string{"b": {"foobar"}},
+				func() *struct {
+					A string `mqp:"b"`
+				} {
+					s := struct {
+						A string `mqp:"b"`
+					}{}
+					return &s
+				}()},
+			func() *struct {
+				A string `mqp:"b"`
+			} {
+				s := struct {
+					A string `mqp:"b"`
+				}{"foobar"}
+				return &s
+			}(), false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
