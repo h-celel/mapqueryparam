@@ -105,6 +105,18 @@ func TestDecode(t *testing.T) {
 		},
 
 		{
+			"ComplexNums", args{map[string][]string{"A": {"(2+2i)"}, "B": {"(3+3i)"}},
+				func() *struct{ A, B complex128 } {
+					s := struct{ A, B complex128 }{}
+					return &s
+				}()},
+			func() *struct{ A, B complex128 } {
+				s := struct{ A, B complex128 }{2 + 2i, 3 + 3i}
+				return &s
+			}(), false,
+		},
+
+		{
 			"Maps", args{map[string][]string{"A": {"{\"foo\":\"bar\"}"}},
 				func() *struct{ A map[string]string } {
 					s := struct{ A map[string]string }{}

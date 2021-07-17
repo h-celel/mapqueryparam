@@ -37,6 +37,7 @@ func TestEncode(t *testing.T) {
 		{"Integers", args{struct{ Value int32 }{32}}, map[string][]string{"Value": {"32"}}, false},
 		{"UIntegers", args{struct{ Value uint32 }{32}}, map[string][]string{"Value": {"32"}}, false},
 		{"Floats", args{struct{ Value float32 }{32.32}}, map[string][]string{"Value": {"32.32"}}, false},
+		{"ComplexNums", args{struct{ Value complex128 }{1.0 + 2.0i}}, map[string][]string{"Value": {"(1+2i)"}}, false},
 		{"Bool", args{struct{ Value bool }{true}}, map[string][]string{"Value": {"true"}}, false},
 		{"Structs", args{struct{ Value struct{ Value2 string } }{struct{ Value2 string }{"foobar"}}}, map[string][]string{"Value": {"{\"Value2\":\"foobar\"}"}}, false},
 		{"Maps", args{struct{ Value map[string]string }{map[string]string{"Value2": "foobar"}}}, map[string][]string{"Value": {"{\"Value2\":\"foobar\"}"}}, false},

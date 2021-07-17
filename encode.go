@@ -120,6 +120,10 @@ func encodeValue(v reflect.Value) (string, error) {
 		return strconv.FormatFloat(v.Float(), 'f', -1, 32), nil
 	case reflect.Float64:
 		return strconv.FormatFloat(v.Float(), 'f', -1, 64), nil
+	case reflect.Complex64:
+		return strconv.FormatComplex(v.Complex(), 'f', -1, 64), nil
+	case reflect.Complex128:
+		return strconv.FormatComplex(v.Complex(), 'f', -1, 128), nil
 	case reflect.Map, reflect.Struct:
 		i := v.Interface()
 		switch t := i.(type) {
