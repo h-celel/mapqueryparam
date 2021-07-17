@@ -124,6 +124,12 @@ func decodeValue(s string, v reflect.Value) error {
 			return err
 		}
 		v.Elem().SetFloat(f)
+	case reflect.Complex64, reflect.Complex128:
+		f, err := strconv.ParseComplex(s, 128)
+		if err != nil {
+			return err
+		}
+		v.Elem().SetComplex(f)
 	case reflect.Map, reflect.Struct:
 		i := v.Interface()
 		switch i.(type) {

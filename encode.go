@@ -120,6 +120,10 @@ func encodeValue(v reflect.Value) (string, error) {
 		return strconv.FormatFloat(v.Float(), 'f', -1, 32), nil
 	case reflect.Float64:
 		return strconv.FormatFloat(v.Float(), 'f', -1, 64), nil
+	case reflect.Complex64:
+		return strconv.FormatComplex(v.Complex(), 'f', -1, 64), nil
+	case reflect.Complex128:
+		return strconv.FormatComplex(v.Complex(), 'f', -1, 128), nil
 	case reflect.Map, reflect.Struct:
 		i := v.Interface()
 		switch t := i.(type) {
@@ -149,6 +153,8 @@ func isEmptyValue(v reflect.Value) bool {
 		return v.Uint() == 0
 	case reflect.Float32, reflect.Float64:
 		return v.Float() == 0
+	case reflect.Complex64, reflect.Complex128:
+		return v.Complex() == 0
 	case reflect.Interface, reflect.Ptr:
 		return v.IsNil()
 	case reflect.Struct:
