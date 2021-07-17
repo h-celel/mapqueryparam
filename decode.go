@@ -11,10 +11,14 @@ import (
 	"time"
 )
 
+// DecodeValues takes a set of query parameters and uses reflection to decode the content into an output structure.
+// Output must be a pointer to a struct. Same as Decode.
 func DecodeValues(query url.Values, v interface{}) error {
 	return Decode(query, v)
 }
 
+// Decode takes a set of query parameters and uses reflection to decode the content into an output structure.
+// Output must be a pointer to a struct. Same as DecodeValues.
 func Decode(query map[string][]string, v interface{}) error {
 	val := reflect.ValueOf(v)
 	t := reflect.TypeOf(v)
@@ -66,6 +70,8 @@ func Decode(query map[string][]string, v interface{}) error {
 	return nil
 }
 
+// decodeField decodes a set of parameter strings as a field of the output struct. Arrays and slices are represented as
+// multiple values. Other values are decoded as a single value.
 func decodeField(s []string, v reflect.Value) error {
 	if len(s) < 0 {
 		return nil
@@ -96,6 +102,9 @@ func decodeField(s []string, v reflect.Value) error {
 	return nil
 }
 
+// decodeValue decodes a parameter string as a value. Base types are parsed using `strconv`. Maps and structs are
+// decoded as json objects using standard json unmarshaling. Channels and functions are skipped, as they're not
+// supported.
 func decodeValue(s string, v reflect.Value) error {
 	switch v.Elem().Kind() {
 	case reflect.String:
@@ -152,6 +161,8 @@ func decodeValue(s string, v reflect.Value) error {
 	return nil
 }
 
+// parseTime parses a string as time.Time. It supports the RFC3339 format, unix seconds, and json marshalled time.Time
+// structs.
 func parseTime(s string) (time.Time, error) {
 	// attempt to parse time as RFC3339 string
 	t, err := time.Parse(time.RFC3339Nano, s)

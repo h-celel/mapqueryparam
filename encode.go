@@ -11,10 +11,14 @@ import (
 	"time"
 )
 
+// EncodeValues takes a input struct and encodes the content into the form of a set of query parameters.
+// Input must be a pointer to a struct. Same as Encode.
 func EncodeValues(v interface{}) (url.Values, error) {
 	return Encode(v)
 }
 
+// Encode takes a input struct and encodes the content into the form of a set of query parameters.
+// Input must be a pointer to a struct. Same as EncodeValues.
 func Encode(v interface{}) (map[string][]string, error) {
 	if v == nil {
 		return map[string][]string{}, nil
@@ -63,6 +67,8 @@ func Encode(v interface{}) (map[string][]string, error) {
 	return res, nil
 }
 
+// getFieldTag returns the tag or name that a struct field is identified by. It prioritizes the MQP tag over the
+// json tag. It defaults to the field name if neither tag is available.
 func getFieldTag(t reflect.StructField) string {
 	if tags := t.Tag.Get(mapQueryParameterTagName); len(tags) > 0 {
 		for _, s := range strings.Split(tags, ",") {
@@ -83,6 +89,8 @@ func getFieldTag(t reflect.StructField) string {
 	return t.Name
 }
 
+// encodeField encodes a field of the input struct as a set of parameter strings. Arrays and slices are represented as
+// multiple strings. Other values are encoded as a single string
 func encodeField(v reflect.Value) ([]string, error) {
 	switch v.Kind() {
 	case reflect.Array, reflect.Slice:
@@ -106,6 +114,8 @@ func encodeField(v reflect.Value) ([]string, error) {
 	}
 }
 
+// encodeValue encodes a single value as a string. Base types are formatted using `strconv`. Maps and structs are
+// encoded as json objects using standard json marshaling. Channels and functions are skipped, as they're not supported.
 func encodeValue(v reflect.Value) (string, error) {
 	switch v.Kind() {
 	case reflect.String:
@@ -133,7 +143,6 @@ func encodeValue(v reflect.Value) (string, error) {
 			b, err := json.Marshal(i)
 			return string(b), err
 		}
-
 	case reflect.Interface, reflect.Ptr:
 		return encodeValue(v.Elem())
 	case reflect.Chan, reflect.Func:
@@ -143,6 +152,8 @@ func encodeValue(v reflect.Value) (string, error) {
 	}
 }
 
+// isEmptyValue validated whether a value is empty/zero/nil. Used to determine if a field should be omitted from the
+// encoded result.
 func isEmptyValue(v reflect.Value) bool {
 	switch v.Kind() {
 	case reflect.Array, reflect.Map, reflect.Slice, reflect.String:
