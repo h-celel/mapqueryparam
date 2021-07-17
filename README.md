@@ -34,7 +34,7 @@ o := StructOfChoice{}
 
 parameters, err := mapqueryparam.EncodeValues(&o)
 if err != nil {
-	panic(err)
+    panic(err)
 }
 
 url := fmt.Sprintf("some.site?%s", parameters.Encode())
