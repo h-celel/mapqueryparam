@@ -3,7 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
-	"mapqueryparam"
+
+	"github.com/h-celel/mapqueryparam"
 )
 
 func main() {

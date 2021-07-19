@@ -1,10 +1,11 @@
 package mapqueryparam_test
 
 import (
-	"mapqueryparam"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/h-celel/mapqueryparam"
 )
 
 func TestEncode(t *testing.T) {

@@ -1,9 +1,10 @@
 package mapqueryparam_test
 
 import (
-	"mapqueryparam"
 	"reflect"
 	"testing"
+
+	"github.com/h-celel/mapqueryparam"
 )
 
 func TestDecode(t *testing.T) {
