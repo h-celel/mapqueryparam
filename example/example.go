@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/h-celel/mapqueryparam"
 )
@@ -21,6 +22,7 @@ func main() {
 		CoolParts []CoolStruct
 		Aliases   []string
 		IsCool    bool
+		ATime     *time.Time
 	}
 
 	cr := &CoolRoot{
@@ -42,6 +44,10 @@ func main() {
 			"Cool Dude",
 		},
 		IsCool: true,
+		ATime: func() *time.Time {
+			t := time.Now()
+			return &t
+		}(),
 	}
 
 	log.Println(fmt.Sprintf("Original object: %v", cr))

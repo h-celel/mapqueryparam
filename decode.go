@@ -96,6 +96,11 @@ func decodeField(s []string, v reflect.Value) error {
 			sVal = reflect.Append(sVal, iVal.Elem())
 		}
 		v.Set(sVal)
+	case reflect.Ptr:
+		if v.IsNil() {
+			v.Set(reflect.New(v.Type().Elem()))
+		}
+		return decodeField(s, v.Elem())
 	default:
 		return decodeValue(s[0], v.Addr())
 	}

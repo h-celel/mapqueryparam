@@ -45,6 +45,33 @@ func TestDecode(t *testing.T) {
 		},
 
 		{
+			"NilPointers", args{map[string][]string{"Value": {"foobar"}},
+				func() *struct{ Value *string } {
+					var s struct{ Value *string }
+					return &s
+				}()},
+			func() *struct{ Value *string } {
+				st := "foobar"
+				s := struct{ Value *string }{&st}
+				return &s
+			}(), false,
+		},
+
+		{
+			"PointerToPointer", args{map[string][]string{"Value": {"foobar"}},
+				func() *struct{ Value **string } {
+					var s struct{ Value **string }
+					return &s
+				}()},
+			func() *struct{ Value **string } {
+				st := "foobar"
+				ptr := &st
+				s := struct{ Value **string }{&ptr}
+				return &s
+			}(), false,
+		},
+
+		{
 			"BasicStruct", args{map[string][]string{"Value": {"foobar"}},
 				func() *struct{ Value string } {
 					s := struct{ Value string }{}
