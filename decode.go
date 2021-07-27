@@ -2,7 +2,6 @@ package mapqueryparam
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"math"
 	"net/url"
@@ -24,7 +23,7 @@ func Decode(query map[string][]string, v interface{}) error {
 	t := reflect.TypeOf(v)
 
 	if val.Kind() != reflect.Ptr {
-		return errors.New("must decode to pointer")
+		return newDecodeError("must decode to pointer", "", nil)
 	}
 
 	for t.Kind() == reflect.Ptr {
@@ -38,7 +37,7 @@ func Decode(query map[string][]string, v interface{}) error {
 	}
 
 	if t.Kind() != reflect.Struct {
-		return fmt.Errorf("cannot decode into value of type: %s", t.String())
+		return newDecodeError(fmt.Sprintf("cannot decode into value of type: %s", t.String()), "", nil)
 	}
 
 	newVal := reflect.New(t)
@@ -61,7 +60,7 @@ func Decode(query map[string][]string, v interface{}) error {
 		fVal := newVal.Elem().Field(i)
 		err := decodeField(s, fVal)
 		if err != nil {
-			return err
+			return newDecodeError(fmt.Sprintf("unable to decode value in field '%s'", fieldTag), fieldTag, err)
 		}
 	}
 
