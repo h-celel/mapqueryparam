@@ -319,7 +319,6 @@ func TestDecodeTime(t *testing.T) {
 		expected, err := time.Parse(time.RFC3339Nano, test)
 		if err != nil {
 			t.Fatalf("failed to parse expected time: %e", err)
-
 		}
 
 		if !expected.Equal(actual.Time) {
