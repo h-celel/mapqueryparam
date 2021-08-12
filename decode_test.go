@@ -1,8 +1,10 @@
 package mapqueryparam_test
 
 import (
+	"net/url"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/h-celel/mapqueryparam"
 )
@@ -292,6 +294,37 @@ func TestDecode(t *testing.T) {
 				t.Errorf("Encode() got = %v, want %v", tt.args.v, tt.want)
 			}
 		})
+	}
+}
+
+func TestDecodeTime(t *testing.T) {
+	// Test Decode() against time.Parse() of the values, using RFC3339Nano
+	tests := []string{
+		"2006-01-02T15:04:05Z",
+		"2006-01-02T15:04:05+07:00",
+		"2006-01-02T15:04:05-07:00",
+	}
+
+	for _, test := range tests {
+		values := url.Values{"time": []string{test}}
+
+		actual := struct {
+			Time time.Time `json:"time"`
+		}{}
+
+		if err := mapqueryparam.DecodeValues(values, &actual); err != nil {
+			t.Fatalf("decode failed: %s", err)
+		}
+
+		expected, err := time.Parse(time.RFC3339Nano, test)
+		if err != nil {
+			t.Fatalf("failed to parse expected time: %e", err)
+
+		}
+
+		if !expected.Equal(actual.Time) {
+			t.Errorf("testing %q: wanted %q, got %q", test, expected, actual.Time)
+		}
 	}
 }
 
