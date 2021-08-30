@@ -79,10 +79,9 @@ func getFieldTag(t reflect.StructField) string {
 	}
 
 	if tags := t.Tag.Get("json"); len(tags) > 0 {
-		for _, s := range strings.Split(tags, ",") {
-			if len(s) > 0 && !strings.EqualFold(s, "omitempty") {
-				return s
-			}
+		jsonTags := strings.Split(tags, ",")
+		if len(jsonTags) > 0 && len(jsonTags[0]) > 0 {
+			return jsonTags[0]
 		}
 	}
 
