@@ -205,21 +205,6 @@ func TestDecode(t *testing.T) {
 			}(), true,
 		},
 
-		// reflect.DeepEqual does not like time.Time :(
-		/*
-			{
-				"Times", args{map[string][]string{"A": {time.Unix(1000, 1000).Format(time.RFC3339Nano)}, "B": {"1000"}, "C": {string(mustMarshal(time.Unix(1000, 1000).MarshalJSON()))}},
-					func() *struct{ A, B, C time.Time } {
-						s := struct{ A, B, C time.Time }{}
-						return &s
-					}()},
-				func() *struct{ A, B, C time.Time } {
-					s := struct{ A, B, C time.Time }{time.Unix(1000, 1000), time.Unix(1000, 0), time.Unix(1000, 1000)}
-					return &s
-				}(), false,
-			},
-		*/
-
 		{
 			"JsonTag", args{map[string][]string{"b": {"foobar"}},
 				func() *struct {
@@ -255,6 +240,26 @@ func TestDecode(t *testing.T) {
 			} {
 				s := struct {
 					A string `mqp:"b"`
+				}{"foobar"}
+				return &s
+			}(), false,
+		},
+
+		{
+			"MultipleMQPTag", args{map[string][]string{"c": {"foobar"}},
+				func() *struct {
+					A string `mqp:"b,c"`
+				} {
+					s := struct {
+						A string `mqp:"b,c"`
+					}{}
+					return &s
+				}()},
+			func() *struct {
+				A string `mqp:"b,c"`
+			} {
+				s := struct {
+					A string `mqp:"b,c"`
 				}{"foobar"}
 				return &s
 			}(), false,
@@ -325,8 +330,4 @@ func TestDecodeTime(t *testing.T) {
 			t.Errorf("testing %q: wanted %q, got %q", test, expected, actual.Time)
 		}
 	}
-}
-
-func mustMarshal(b []byte, _ error) []byte {
-	return b
 }

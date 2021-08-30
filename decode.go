@@ -50,17 +50,23 @@ func Decode(query map[string][]string, v interface{}) error {
 		}
 
 		var s []string
+		var tag string
 		var ok bool
 
-		fieldTag := getFieldTag(fTyp)
-		if s, ok = query[fieldTag]; !ok {
+		fieldTags := getFieldTags(fTyp)
+		for _, tag = range fieldTags {
+			if s, ok = query[tag]; ok {
+				break
+			}
+		}
+		if len(s) == 0 {
 			continue
 		}
 
 		fVal := newVal.Elem().Field(i)
 		err := decodeField(s, fVal)
 		if err != nil {
-			return newDecodeError(fmt.Sprintf("unable to decode value in field '%s'", fieldTag), fieldTag, err)
+			return newDecodeError(fmt.Sprintf("unable to decode value in field '%s'", tag), tag, err)
 		}
 	}
 
