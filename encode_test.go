@@ -47,7 +47,7 @@ func TestEncode(t *testing.T) {
 			A string `json:"b,omitempty"`
 		}{"foobar"}}, map[string][]string{"b": {"foobar"}}, false},
 		{"MQPTag", args{struct {
-			A string `json:"b" mqp:"c"`
+			A string `json:"b" mqp:"c,d"`
 		}{"foobar"}}, map[string][]string{"c": {"foobar"}}, false},
 		{"SkipChannels", args{struct{ Value chan string }{Value: make(chan string)}}, map[string][]string{}, false},
 		{"SkipFunctions", args{struct{ Value func() }{Value: func() {}}}, map[string][]string{}, false},

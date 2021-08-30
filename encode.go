@@ -59,33 +59,45 @@ func Encode(v interface{}) (map[string][]string, error) {
 			continue
 		}
 
-		fieldTag := getFieldTag(fTyp)
+		fieldTags := getFieldTags(fTyp)
 
-		res[fieldTag] = d
+		res[fieldTags[0]] = d
 	}
 
 	return res, nil
 }
 
-// getFieldTag returns the tag or name that a struct field is identified by. It prioritizes the MQP tag over the
+// getFieldTags returns the tags or names that a struct field is identified by. It prioritizes the MQP tag over the
 // json tag. It defaults to the field name if neither tag is available.
-func getFieldTag(t reflect.StructField) string {
+func getFieldTags(t reflect.StructField) (res []string) {
 	if tags := t.Tag.Get(mapQueryParameterTagName); len(tags) > 0 {
 		for _, s := range strings.Split(tags, ",") {
 			if len(s) > 0 {
-				return s
+				res = append(res, s)
 			}
 		}
+	}
+
+	// ignore json tags and field name if mqp tag is present
+	if len(res) > 0 {
+		return
 	}
 
 	if tags := t.Tag.Get("json"); len(tags) > 0 {
 		jsonTags := strings.Split(tags, ",")
 		if len(jsonTags) > 0 && len(jsonTags[0]) > 0 {
-			return jsonTags[0]
+			res = append(res, jsonTags[0])
 		}
 	}
 
-	return t.Name
+	// ignore field name if json tag is present
+	if len(res) > 0 {
+		return
+	}
+
+	res = append(res, t.Name)
+
+	return
 }
 
 // encodeField encodes a field of the input struct as a set of parameter strings. Arrays and slices are represented as
