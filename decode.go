@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+var zeroValue reflect.Value
+
 // DecodeValues takes a set of query parameters and uses reflection to decode the content into an output structure.
 // Output must be a pointer to a struct. Same as Decode.
 func DecodeValues(query url.Values, v interface{}) error {
@@ -42,7 +44,7 @@ func Decode(query map[string][]string, v interface{}) error {
 
 	newVal := reflect.New(t)
 
-	err := decodeFields(query, newVal.Elem())
+	err := decodeFields(query, val, newVal.Elem())
 	if err != nil {
 		return err
 	}
@@ -52,11 +54,12 @@ func Decode(query map[string][]string, v interface{}) error {
 	return nil
 }
 
-// decodeFields iterates over the fields of the value passed to it, decodes the values appropriate for the field, and
-// stores the values in the field.
-func decodeFields(query map[string][]string, val reflect.Value) error {
-	t := val.Type()
-	for i := 0; i < val.NumField(); i++ {
+// decodeFields iterates over the fields of the value passed to it, decodes the query values appropriate for the field,
+// and stores the values in the field. The original value is also passed and is used for fields that are found in the
+// query.
+func decodeFields(query map[string][]string, oldVal reflect.Value, newVal reflect.Value) error {
+	t := newVal.Type()
+	for i := 0; i < newVal.NumField(); i++ {
 		f := t.Field(i)
 
 		// don't decode to unexported fields
@@ -66,7 +69,12 @@ func decodeFields(query map[string][]string, val reflect.Value) error {
 		}
 
 		fTyp := f.Type
-		fVal := val.Field(i)
+		fVal := newVal.Field(i)
+
+		oldFVal := zeroValue
+		if oldVal != zeroValue {
+			oldFVal = oldVal.Field(i)
+		}
 
 		// iterate over embedded fields
 		if f.Anonymous {
@@ -77,13 +85,22 @@ func decodeFields(query map[string][]string, val reflect.Value) error {
 					fVal.Set(reflect.New(fTyp))
 				}
 
+				if oldFVal != zeroValue && oldFVal.IsNil() {
+					oldFVal = zeroValue
+				}
+
 				fVal = fVal.Elem()
+				if oldFVal != zeroValue {
+					oldFVal = oldFVal.Elem()
+				}
 			}
 
-			err := decodeFields(query, fVal)
+			err := decodeFields(query, oldFVal, fVal)
 			if err != nil {
 				return err
 			}
+
+			continue
 		}
 
 		var s []string
@@ -97,6 +114,10 @@ func decodeFields(query map[string][]string, val reflect.Value) error {
 			}
 		}
 		if len(s) == 0 {
+			if oldFVal != zeroValue {
+				fVal.Set(oldFVal)
+			}
+
 			continue
 		}
 
