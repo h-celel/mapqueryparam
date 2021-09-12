@@ -9,6 +9,13 @@ import (
 )
 
 func TestEncode(t *testing.T) {
+	type EmbeddedStruct struct {
+		A string
+	}
+	type EmbeddedStruct2 struct {
+		EmbeddedStruct
+	}
+
 	type args struct {
 		v interface{}
 	}
@@ -51,6 +58,10 @@ func TestEncode(t *testing.T) {
 		}{"foobar"}}, map[string][]string{"c": {"foobar"}}, false},
 		{"SkipChannels", args{struct{ Value chan string }{Value: make(chan string)}}, map[string][]string{}, false},
 		{"SkipFunctions", args{struct{ Value func() }{Value: func() {}}}, map[string][]string{}, false},
+		{"EmbeddedStruct", args{struct{ EmbeddedStruct }{EmbeddedStruct{A: "a"}}}, map[string][]string{"A": {"a"}}, false},
+		{"SubEmbeddedStruct", args{struct{ EmbeddedStruct2 }{EmbeddedStruct2{EmbeddedStruct{A: "a"}}}}, map[string][]string{"A": {"a"}}, false},
+		{"EmbeddedPointer", args{struct{ *EmbeddedStruct }{&EmbeddedStruct{A: "a"}}}, map[string][]string{"A": {"a"}}, false},
+		{"EmbeddedNilPointer", args{struct{ *EmbeddedStruct }{EmbeddedStruct: nil}}, map[string][]string{}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
