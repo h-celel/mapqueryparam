@@ -37,23 +37,49 @@ func Encode(v interface{}) (map[string][]string, error) {
 	if val.Kind() != reflect.Struct {
 		return nil, errors.New("unable to encode non-struct")
 	}
-	t := val.Type()
+	err := encodeFields(val, res)
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+// encodeFields iterates over the fields of the value passed to it, and stores the encoded fields in the results map.
+func encodeFields(val reflect.Value, result map[string][]string) error {
 	for i := 0; i < val.NumField(); i++ {
-		fTyp := t.Field(i)
+		fTyp := val.Type().Field(i)
+
+		// don't encode unexported fields
 		isUnexported := fTyp.PkgPath != ""
 		if isUnexported {
 			continue
 		}
 
+		// don't attempt to encode empty fields
 		fVal := val.Field(i)
-
 		if isEmptyValue(fVal) {
+			continue
+		}
+
+		// iterate over embedded fields
+		if fTyp.Anonymous {
+			for fVal.Kind() == reflect.Ptr {
+				if fVal.IsNil() {
+					continue
+				}
+				fVal = fVal.Elem()
+			}
+			err := encodeFields(fVal, result)
+			if err != nil {
+				return err
+			}
 			continue
 		}
 
 		d, err := encodeField(fVal)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		if len(d) == 0 {
 			continue
@@ -61,10 +87,9 @@ func Encode(v interface{}) (map[string][]string, error) {
 
 		fieldTags := getFieldTags(fTyp)
 
-		res[fieldTags[0]] = d
+		result[fieldTags[0]] = d
 	}
-
-	return res, nil
+	return nil
 }
 
 // getFieldTags returns the tags or names that a struct field is identified by. It prioritizes the MQP tag over the

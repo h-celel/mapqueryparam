@@ -10,6 +10,13 @@ import (
 )
 
 func TestDecode(t *testing.T) {
+	type EmbeddedStruct struct {
+		A string
+	}
+	type EmbeddedStruct2 struct {
+		EmbeddedStruct
+	}
+
 	type args struct {
 		query map[string][]string
 		v     interface{}
@@ -285,6 +292,54 @@ func TestDecode(t *testing.T) {
 				}()},
 			func() *struct{ Value func() } {
 				s := struct{ Value func() }{}
+				return &s
+			}(), false,
+		},
+
+		{
+			"EmbeddedStruct", args{map[string][]string{"A": {"a"}},
+				func() *struct{ EmbeddedStruct } {
+					s := struct{ EmbeddedStruct }{}
+					return &s
+				}()},
+			func() *struct{ EmbeddedStruct } {
+				s := struct{ EmbeddedStruct }{EmbeddedStruct{A: "a"}}
+				return &s
+			}(), false,
+		},
+
+		{
+			"SubEmbeddedStruct", args{map[string][]string{"A": {"a"}},
+				func() *struct{ EmbeddedStruct2 } {
+					s := struct{ EmbeddedStruct2 }{}
+					return &s
+				}()},
+			func() *struct{ EmbeddedStruct2 } {
+				s := struct{ EmbeddedStruct2 }{EmbeddedStruct2{EmbeddedStruct{A: "a"}}}
+				return &s
+			}(), false,
+		},
+
+		{
+			"EmbeddedPointer", args{map[string][]string{"A": {"a"}},
+				func() *struct{ *EmbeddedStruct } {
+					s := struct{ *EmbeddedStruct }{&EmbeddedStruct{}}
+					return &s
+				}()},
+			func() *struct{ *EmbeddedStruct } {
+				s := struct{ *EmbeddedStruct }{&EmbeddedStruct{A: "a"}}
+				return &s
+			}(), false,
+		},
+
+		{
+			"EmbeddedNilPointer", args{map[string][]string{"A": {"a"}},
+				func() *struct{ *EmbeddedStruct } {
+					s := struct{ *EmbeddedStruct }{}
+					return &s
+				}()},
+			func() *struct{ *EmbeddedStruct } {
+				s := struct{ *EmbeddedStruct }{&EmbeddedStruct{A: "a"}}
 				return &s
 			}(), false,
 		},

@@ -42,18 +42,55 @@ func Decode(query map[string][]string, v interface{}) error {
 
 	newVal := reflect.New(t)
 
-	for i := 0; i < newVal.Elem().NumField(); i++ {
-		fTyp := t.Field(i)
-		isUnexported := fTyp.PkgPath != ""
+	err := decodeFields(query, newVal.Elem())
+	if err != nil {
+		return err
+	}
+
+	val.Set(newVal.Elem())
+
+	return nil
+}
+
+// decodeFields iterates over the fields of the value passed to it, decodes the values appropriate for the field, and
+// stores the values in the field.
+func decodeFields(query map[string][]string, val reflect.Value) error {
+	t := val.Type()
+	for i := 0; i < val.NumField(); i++ {
+		f := t.Field(i)
+
+		// don't decode to unexported fields
+		isUnexported := f.PkgPath != ""
 		if isUnexported {
 			continue
+		}
+
+		fTyp := f.Type
+		fVal := val.Field(i)
+
+		// iterate over embedded fields
+		if f.Anonymous {
+			for fTyp.Kind() == reflect.Ptr {
+				fTyp = fTyp.Elem()
+
+				if fVal.IsNil() {
+					fVal.Set(reflect.New(fTyp))
+				}
+
+				fVal = fVal.Elem()
+			}
+
+			err := decodeFields(query, fVal)
+			if err != nil {
+				return err
+			}
 		}
 
 		var s []string
 		var tag string
 		var ok bool
 
-		fieldTags := getFieldTags(fTyp)
+		fieldTags := getFieldTags(f)
 		for _, tag = range fieldTags {
 			if s, ok = query[tag]; ok {
 				break
@@ -63,15 +100,11 @@ func Decode(query map[string][]string, v interface{}) error {
 			continue
 		}
 
-		fVal := newVal.Elem().Field(i)
 		err := decodeField(s, fVal)
 		if err != nil {
 			return newDecodeError(fmt.Sprintf("unable to decode value in field '%s'", tag), tag, err)
 		}
 	}
-
-	val.Set(newVal.Elem())
-
 	return nil
 }
 
