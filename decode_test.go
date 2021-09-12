@@ -386,3 +386,23 @@ func TestDecodeTime(t *testing.T) {
 		}
 	}
 }
+
+func TestDecode_KeepOldValues(t *testing.T) {
+	type S struct {
+		A string
+		B string
+	}
+
+	want := &S{A: "a", B: "b"}
+
+	s := &S{A: "a"}
+
+	err := mapqueryparam.Decode(map[string][]string{"B": {"b"}}, s)
+	if err != nil {
+		t.Errorf("decode failed: %s", err)
+	}
+
+	if !reflect.DeepEqual(s, want) {
+		t.Errorf("Encode() got = %v, want %v", s, want)
+	}
+}
