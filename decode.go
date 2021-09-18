@@ -132,7 +132,7 @@ func decodeFields(query map[string][]string, oldVal reflect.Value, newVal reflec
 // decodeField decodes a set of parameter strings as a field of the output struct. Arrays and slices are represented as
 // multiple values. Other values are decoded as a single value.
 func decodeField(s []string, v reflect.Value) error {
-	if len(s) < 0 {
+	if len(s) == 0 {
 		return nil
 	}
 	switch v.Kind() {
