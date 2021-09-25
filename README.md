@@ -1,4 +1,10 @@
-# mapqueryparam
+# mapqueryparam 
+
+[![go report card](https://goreportcard.com/badge/github.com/h-celel/mapqueryparam "go report card")](https://goreportcard.com/report/github.com/h-celel/mapqueryparam)
+[![test status](https://github.com/h-celel/mapqueryparam/actions/workflows/tests.yml/badge.svg "tests")](https://github.com/h-celel/mapqueryparam/actions/workflows/tests.yml)
+[![golangci-lint](https://github.com/h-celel/mapqueryparam/actions/workflows/golangci-lint.yml/badge.svg "golangci-lint")](https://github.com/h-celel/mapqueryparam/actions/workflows/golangci-lint.yml)
+[![MIT license](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
+[![Go.Dev reference](https://img.shields.io/badge/go.dev-reference-blue?logo=go)](https://pkg.go.dev/github.com/h-celel/mapqueryparam)
 
 mapqueryparam is a Go library for encoding and decoding structs as URL query
 parameters. The query parameters use the same format as the ones found in the 

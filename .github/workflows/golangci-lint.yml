@@ -1,10 +1,10 @@
-on: [push, pull_request]
-name: Test
+name: golangci-lint
+on: [pull_request]
 jobs:
-  test:
+  golangci-lint:
     strategy:
       matrix:
-        go-version: [1.16.x]
+        go-version: [1.17.x]
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
@@ -14,5 +14,5 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Test
-        run: go test ./...
+      - name: golangci-lint
+        uses: reviewdog/action-golangci-lint@v2
